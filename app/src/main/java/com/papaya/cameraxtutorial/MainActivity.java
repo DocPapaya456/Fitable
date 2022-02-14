@@ -49,6 +49,7 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.google.android.gms.common.util.SharedPreferencesUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -76,8 +77,10 @@ public class MainActivity extends AppCompatActivity {
     PreviewView previewView;
     private ImageAnalysis imageAnalysis;
     private RelativeLayout relativeLayout;
+    RepCounter repCounter;
     ImageView imgView;
-    private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
+    TextView repView;
+    boolean wasDown;
 
     DrawView canvasView;
     private PoseDetector poseDetector;
@@ -102,6 +105,9 @@ public class MainActivity extends AppCompatActivity {
         imgView = findViewById(R.id.imgView);
         imgView.setRotation(-90f);
 
+        repView = findViewById(R.id.repCounter);
+
+        repCounter = new RepCounter("squats");
 
         Scr_w = (int) Resources.getSystem().getDisplayMetrics().widthPixels;
         Scr_h = (int) Resources.getSystem().getDisplayMetrics().heightPixels;
@@ -145,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
         Preview preview = new Preview.Builder().build();
 
         imageAnalysis = new ImageAnalysis.Builder()
-                .setDefaultResolution(new Size(imgView.getWidth(), imgView.getHeight()))
+                .setTargetResolution(new Size(imgView.getWidth(), imgView.getHeight()))
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build();
         imageAnalysis.setAnalyzer(getExecutor(), new ImageAnalysis.Analyzer() {
@@ -169,7 +175,15 @@ public class MainActivity extends AppCompatActivity {
                                 public void onSuccess(@NonNull Pose pose) {
                                     //get skeletal landmarks
                                     allPoseLandmarks = pose.getAllPoseLandmarks();
+                                    String pos = repCounter.checkPose(allPoseLandmarks);
                                     canvasView.DrawPose(allPoseLandmarks, imgView.getWidth(), imgView.getHeight(), imgView.getLeft(), imgView.getTop());
+                                    if (pos == "up" && wasDown == true) {
+                                        repCounter.setReps(repCounter.getReps() + 1);
+                                        repView.setText("Squats: " + String.valueOf(repCounter.getReps()));
+                                        wasDown = false;
+                                    } else if (pos == "down" && wasDown == false) {
+                                        wasDown = true;
+                                    }
                                 }
                             }
                     ).addOnFailureListener(
