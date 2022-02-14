@@ -189,8 +189,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-
+        //hello
         //preview.setSurfaceProvider(previewView.getSurfaceProvider());
 
 
