@@ -56,8 +56,8 @@ public class RepCounter {
                     }
                     if (lh != null && rh != null && lk != null && rk != null) {
                         if ((lh.getPosition().y > lk.getPosition().y && rh.getPosition().y > rk.getPosition().y) &&
-                                (la.getPosition().y <= ankleY + 10 && la.getPosition().y >= ankleY - 10 ) &&
-                                (ra.getPosition().y <= ankleY + 10 && ra.getPosition().y >= ankleY - 10 )) {
+                                (la.getPosition().y >= ankleY + 10 && la.getPosition().y <= ankleY - 10 ) &&
+                                (ra.getPosition().y >= ankleY + 10 && ra.getPosition().y <= ankleY - 10 )) {
                             return "down";
                         } else {
                             return "up";
