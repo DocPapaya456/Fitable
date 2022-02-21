@@ -26,6 +26,15 @@
         android:text="Squats: 0"
         android:fontFamily="monospace"
         android:textSize="24sp"/>
+    <Button
+        android:id="@+id/startBtn"
+        android:text="START"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="128dp" />
+
 
 
 
