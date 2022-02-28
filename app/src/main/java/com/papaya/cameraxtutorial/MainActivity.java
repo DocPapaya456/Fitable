@@ -84,6 +84,8 @@ public class MainActivity extends AppCompatActivity {
     ImageView imgView;
     TextView repView;
     Button startBtn;
+    Button backBtn;
+    Button resetBtn;
     boolean wasDown;
     boolean isStart = false;
     Float ankleY;
@@ -153,6 +155,23 @@ public class MainActivity extends AppCompatActivity {
                }
            }
        });
+
+       backBtn = findViewById(R.id.backBtn);
+       backBtn.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View view) {
+               finish();
+           }
+       });
+
+       resetBtn = findViewById(R.id.resetBtn);
+       resetBtn.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View view) {
+               repCounter.setReps(0);
+               repView.setText("Squats: " + String.valueOf(repCounter.getReps()));
+           }
+       });
     }
 
 
@@ -171,7 +190,8 @@ public class MainActivity extends AppCompatActivity {
         Preview preview = new Preview.Builder().build();
 
         imageAnalysis = new ImageAnalysis.Builder()
-                .setTargetResolution(new Size(imgView.getWidth(), imgView.getHeight()))
+                .setMaxResolution(new Size(imgView.getWidth(), imgView.getHeight()))
+                .setDefaultResolution(new Size(imgView.getWidth(), imgView.getHeight()))
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build();
         imageAnalysis.setAnalyzer(getExecutor(), new ImageAnalysis.Analyzer() {
