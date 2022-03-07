@@ -22,7 +22,7 @@ public class RepCounter {
         this.type = type;
     }
 
-    public String checkPose(List<PoseLandmark> landmarks, Float ankleY) {
+    public String checkPose(List<PoseLandmark> landmarks, Float height) {
         if (landmarks != null) {
             switch (type) {
                 case "squats":

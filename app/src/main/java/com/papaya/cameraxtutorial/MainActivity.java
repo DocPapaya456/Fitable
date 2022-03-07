@@ -72,6 +72,8 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import com.gusakov.library.PulseCountDown;
+import com.gusakov.library.java.interfaces.OnCountdownCompleted;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -86,9 +88,10 @@ public class MainActivity extends AppCompatActivity {
     Button startBtn;
     Button backBtn;
     Button resetBtn;
+    PulseCountDown pulseCountDown;
     boolean wasDown;
     boolean isStart = false;
-    Float ankleY;
+    Float height;
 
     DrawView canvasView;
     private PoseDetector poseDetector;
@@ -142,6 +145,9 @@ public class MainActivity extends AppCompatActivity {
             }
         }, getExecutor());
 
+       pulseCountDown = findViewById(R.id.pulseCountDown);
+       pulseCountDown.setVisibility(View.INVISIBLE);
+
        startBtn = findViewById(R.id.startBtn);
        startBtn.setOnClickListener(new View.OnClickListener() {
            @Override
@@ -150,8 +156,16 @@ public class MainActivity extends AppCompatActivity {
                    isStart = false;
                    startBtn.setText("START");
                } else {
-                   isStart = true;
+                   //isStart = true;
                    startBtn.setText("STOP");
+                   pulseCountDown.setVisibility(View.VISIBLE);
+                   pulseCountDown.start(new OnCountdownCompleted() {
+                       @Override
+                       public void completed() {
+                           isStart = true;
+                           pulseCountDown.setVisibility(View.INVISIBLE);
+                       }
+                   });
                }
            }
        });
@@ -190,8 +204,7 @@ public class MainActivity extends AppCompatActivity {
         Preview preview = new Preview.Builder().build();
 
         imageAnalysis = new ImageAnalysis.Builder()
-                .setMaxResolution(new Size(imgView.getWidth(), imgView.getHeight()))
-                .setDefaultResolution(new Size(imgView.getWidth(), imgView.getHeight()))
+                .setTargetResolution(new Size(imgView.getWidth(), imgView.getHeight()))
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build();
         imageAnalysis.setAnalyzer(getExecutor(), new ImageAnalysis.Analyzer() {
@@ -217,10 +230,10 @@ public class MainActivity extends AppCompatActivity {
                                     allPoseLandmarks = pose.getAllPoseLandmarks();
                                     canvasView.DrawPose(allPoseLandmarks, imgView.getWidth(), imgView.getHeight(), imgView.getLeft(), imgView.getTop());
                                     if (isStart) {
-                                        if (ankleY == null) {
-                                            ankleY = allPoseLandmarks.get(PoseLandmark.LEFT_ANKLE).getPosition().y;
+                                        if (height == null) {
+                                            height = allPoseLandmarks.get(PoseLandmark.LEFT_SHOULDER).getPosition().y - allPoseLandmarks.get(PoseLandmark.LEFT_ANKLE).getPosition().y;
                                         }
-                                        String pos = repCounter.checkPose(allPoseLandmarks, ankleY);
+                                        String pos = repCounter.checkPose(allPoseLandmarks, height);
                                         if (pos == "up" && wasDown == true) {
                                             repCounter.setReps(repCounter.getReps() + 1);
                                             repView.setText("Squats: " + String.valueOf(repCounter.getReps()));

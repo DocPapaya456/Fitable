@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/relativeLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -9,11 +10,22 @@
         android:layout_height="480dp"
         android:layout_centerInParent="true"/>-->
 
+
+
     <ImageView
         android:id="@+id/imgView"
         android:layout_width="360dp"
         android:layout_height="480dp"
         android:layout_centerInParent="true"/>
+
+    <com.gusakov.library.PulseCountDown
+        android:id="@+id/pulseCountDown"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="5"
+        android:textSize="100sp"
+        app:pc_startValue="5"
+        android:layout_centerInParent="true" />
 
     <TextView
         android:id="@+id/repCounter"
