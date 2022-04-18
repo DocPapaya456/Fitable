@@ -28,6 +28,10 @@ android {
     }
 }
 
+realm {
+    syncEnabled = true
+}
+
 dependencies {
 
     def cameraxVersion = "1.1.0-alpha05"
@@ -35,7 +39,7 @@ dependencies {
     implementation "androidx.camera:camera-camera2:${cameraxVersion}"
     implementation "androidx.camera:camera-lifecycle:${cameraxVersion}"
 
-    implementation "com.gusakov:pulse-countdown:1.1.0-rc1"
+    implementation 'com.gusakov:pulse-countdown:1.1.0-rc1'
 
 // CameraX View class
     implementation 'androidx.camera:camera-view:1.0.0-alpha25'
