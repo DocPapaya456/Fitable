@@ -72,8 +72,6 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-import com.gusakov.library.PulseCountDown;
-import com.gusakov.library.java.interfaces.OnCountdownCompleted;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -88,7 +86,6 @@ public class MainActivity extends AppCompatActivity {
     Button startBtn;
     Button backBtn;
     Button resetBtn;
-    PulseCountDown pulseCountDown;
     boolean wasDown;
     boolean isStart = false;
     Float height;
@@ -145,8 +142,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }, getExecutor());
 
-       pulseCountDown = findViewById(R.id.pulseCountDown);
-       pulseCountDown.setVisibility(View.INVISIBLE);
 
        startBtn = findViewById(R.id.startBtn);
        startBtn.setOnClickListener(new View.OnClickListener() {
@@ -158,14 +153,7 @@ public class MainActivity extends AppCompatActivity {
                } else {
                    //isStart = true;
                    startBtn.setText("STOP");
-                   pulseCountDown.setVisibility(View.VISIBLE);
-                   pulseCountDown.start(new OnCountdownCompleted() {
-                       @Override
-                       public void completed() {
-                           isStart = true;
-                           pulseCountDown.setVisibility(View.INVISIBLE);
-                       }
-                   });
+                   isStart = true;
                }
            }
        });

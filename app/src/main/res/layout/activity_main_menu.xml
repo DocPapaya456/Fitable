@@ -7,8 +7,8 @@
         android:id="@+id/squatBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="squats"
-        android:layout_centerInParent="true"/>
+        android:layout_centerInParent="true"
+        android:text="squats" />
 
 
 </RelativeLayout>
