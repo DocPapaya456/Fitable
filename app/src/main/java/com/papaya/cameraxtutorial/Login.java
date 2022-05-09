@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -30,6 +31,7 @@ import io.realm.mongodb.User;
 
 public class Login extends AppCompatActivity {
     String appID = "fitable-lscah";
+    String appToken = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBJZCI6ImM4MjJmNDU2ZTg4NzQ2MWJiNjQyMGNmNzc2ZTU5ZjA3Iiwic2NvcGUiOiJhcHAiLCJpYXQiOjE2NDg0NTUyOTl9.bq4bI00jcgDmWkxBfAYqZDq7yV4h7Z8vdHc3DHPpag12HfzSNgaezkLt8qPUXxosN2ryxlTN1BnVXQbbA-_BhAG4QQY6w6Ga8g6nmcfzJplBPKESydoNR5U3c8o6Ok-6VNnCMJnpusd3GbnfNq3VPXirW_BcoyUH8o9r4HeD2aUaGOXThuyT0rgOWu5xLfOIRIMnv_Gixp-VkKXZxlWUqkjGdvv8umJodhI664DU5lYLgedks-OC8cSa2CXo5P3UXokztK6lhRvre3JFGV-kp4Uen0W0kXm5FNlOb5zAZG8QWJoxWS4brvutIgD29vBDvZ0qUSGMb6qkUZmKhgSsc1xADmZBPR90VWMRRxINdozSfniEaTrlPTP9TJmsL_WfuqGK_4AwgiysQ2tuIKBIHakPYdl_kOfaiEWGvDK81YLgSmMg-XsQYh2PdssqbzjT8mX1JxXNF0hcBJ8MaUQfOsEov3r20FuhJhtNXb9zYlgMwwE9U0y08fgL7k_p5A8l";
     EditText emailTxtField;
     EditText pwdTxtField;
     String email, pwd;
@@ -68,8 +70,8 @@ public class Login extends AppCompatActivity {
                 try {
                     URL url = new URL("https://rest.cosync.net/api/appuser/login");
                     HttpsURLConnection urlCon = (HttpsURLConnection) url.openConnection();
+                    urlCon.setRequestProperty("app-token", appToken);
                     urlCon.setRequestMethod("POST");
-                    urlCon.setRequestProperty("app-token", "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBJZCI6ImM4MjJmNDU2ZTg4NzQ2MWJiNjQyMGNmNzc2ZTU5ZjA3Iiwic2NvcGUiOiJhcHAiLCJpYXQiOjE2NDg0NTUyOTl9.bq4bI00jcgDmWkxBfAYqZDq7yV4h7Z8vdHc3DHPpag12HfzSNgaezkLt8qPUXxosN2ryxlTN1BnVXQbbA-_BhAG4QQY6w6Ga8g6nmcfzJplBPKESydoNR5U3c8o6Ok-6VNnCMJnpusd3GbnfNq3VPXirW_BcoyUH8o9r4HeD2aUaGOXThuyT0rgOWu5xLfOIRIMnv_Gixp-VkKXZxlWUqkjGdvv8umJodhI664DU5lYLgedks-OC8cSa2CXo5P3UXokztK6lhRvre3JFGV-kp4Uen0W0kXm5FNlOb5zAZG8QWJoxWS4brvutIgD29vBDvZ0qUSGMb6qkUZmKhgSsc1xADmZBPR90VWMRRxINdozSfniEaTrlPTP9TJmsL_WfuqGK_4AwgiysQ2tuIKBIHakPYdl_kOfaiEWGvDK81YLgSmMg-XsQYh2PdssqbzjT8mX1JxXNF0hcBJ8MaUQfOsEov3r20FuhJhtNXb9zYlgMwwE9U0y08fgL7k_p5A8l");
                     urlCon.setDoOutput(true);
                     urlCon.setDoInput(true);
 
@@ -104,14 +106,17 @@ public class Login extends AppCompatActivity {
                     } else {
                         Log.e("COSYNC", urlCon.getResponseMessage());
                         Log.e("COSYNC", String.valueOf(urlCon.getResponseCode()));
-                        InputStream in = urlCon.getInputStream();
-                        InputStreamReader isw = new InputStreamReader(in);
-                        JsonReader jsonReader = new JsonReader(isw);
-                        jsonReader.beginObject();
-                        while (jsonReader.hasNext()) {
-                            Log.e("COSYNC", jsonReader.nextString());
+                        if (urlCon != null) {
+                            InputStream in = urlCon.getErrorStream();
+                            InputStreamReader isw = new InputStreamReader(in);
+                            JsonReader jsonReader = new JsonReader(isw);
+                            jsonReader.beginObject();
+                            while (jsonReader.hasNext()) {
+                                String value = jsonReader.nextString();
+                                Log.e("COSYNC", value);
+                            }
+                            jsonReader.close();
                         }
-                        jsonReader.close();
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
