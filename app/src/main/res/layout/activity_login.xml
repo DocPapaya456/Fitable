@@ -29,6 +29,15 @@
         android:layout_centerInParent="true"
         android:layout_below="@id/passTxtField"
         android:layout_marginTop="24dp"/>
+    <TextView
+        android:id="@+id/loginText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Login to Fitable"
+        android:textSize="24dp"
+        android:layout_centerInParent="true"
+        android:layout_above="@id/emailTxtField"
+        android:layout_marginBottom="16dp"/>
 
 
 </RelativeLayout>

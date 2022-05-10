@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.papaya.cameraxtutorial.R;
 
@@ -37,6 +38,7 @@ public class Login extends AppCompatActivity {
     String appToken = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBJZCI6ImM4MjJmNDU2ZTg4NzQ2MWJiNjQyMGNmNzc2ZTU5ZjA3Iiwic2NvcGUiOiJhcHAiLCJpYXQiOjE2NDg0NTUyOTl9.bq4bI00jcgDmWkxBfAYqZDq7yV4h7Z8vdHc3DHPpag12HfzSNgaezkLt8qPUXxosN2ryxlTN1BnVXQbbA-_BhAG4QQY6w6Ga8g6nmcfzJplBPKESydoNR5U3c8o6Ok-6VNnCMJnpusd3GbnfNq3VPXirW_BcoyUH8o9r4HeD2aUaGOXThuyT0rgOWu5xLfOIRIMnv_Gixp-VkKXZxlWUqkjGdvv8umJodhI664DU5lYLgedks-OC8cSa2CXo5P3UXokztK6lhRvre3JFGV-kp4Uen0W0kXm5FNlOb5zAZG8QWJoxWS4brvutIgD29vBDvZ0qUSGMb6qkUZmKhgSsc1xADmZBPR90VWMRRxINdozSfniEaTrlPTP9TJmsL_WfuqGK_4AwgiysQ2tuIKBIHakPYdl_kOfaiEWGvDK81YLgSmMg-XsQYh2PdssqbzjT8mX1JxXNF0hcBJ8MaUQfOsEov3r20FuhJhtNXb9zYlgMwwE9U0y08fgL7k_p5A8l";
     EditText emailTxtField;
     EditText pwdTxtField;
+    TextView loginText;
     String email, pwd;
     String[] params = {};
     String jwt;
@@ -51,12 +53,14 @@ public class Login extends AppCompatActivity {
         Button loginBtn = findViewById(R.id.loginBtn);
         emailTxtField = findViewById(R.id.emailTxtField);
         pwdTxtField = findViewById(R.id.passTxtField);
+        loginText = findViewById(R.id.loginText);
         loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (emailTxtField != null && pwdTxtField != null) {
                     email = emailTxtField.getText().toString();
                     pwd = md5(pwdTxtField.getText().toString());
+                    loginText.setText("Loading...");
                     postLogin(email, pwd);
                 }
             }
@@ -118,9 +122,15 @@ public class Login extends AppCompatActivity {
                             jsonReader.beginObject();
                             while (jsonReader.hasNext()) {
                                 String key = jsonReader.nextName();
-                                if (key != null) {
-                                    String value = jsonReader.nextString();
-                                    Log.e("COSYNC", value);
+                                if (key == "code") {
+                                    int code = jsonReader.nextInt();
+                                    Log.e("COSYNC", String.valueOf(code));
+                                    if (code == 600) {
+                                        loginText.setText("Wrong email or password. Please try again.");
+                                    } else {
+                                        String value = jsonReader.nextString();
+                                        Log.e("COSYNC", value);
+                                    }
                                 }
                             }
                             jsonReader.close();
