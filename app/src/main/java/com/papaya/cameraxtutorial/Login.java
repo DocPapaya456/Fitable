@@ -1,5 +1,6 @@
 package com.papaya.cameraxtutorial;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Debug;
 import android.util.JsonReader;
@@ -18,6 +19,8 @@ import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
@@ -53,7 +56,7 @@ public class Login extends AppCompatActivity {
             public void onClick(View view) {
                 if (emailTxtField != null && pwdTxtField != null) {
                     email = emailTxtField.getText().toString();
-                    pwd = pwdTxtField.getText().toString();
+                    pwd = md5(pwdTxtField.getText().toString());
                     postLogin(email, pwd);
                 }
             }
@@ -70,8 +73,10 @@ public class Login extends AppCompatActivity {
                 try {
                     URL url = new URL("https://rest.cosync.net/api/appuser/login");
                     HttpsURLConnection urlCon = (HttpsURLConnection) url.openConnection();
-                    urlCon.setRequestProperty("app-token", appToken);
                     urlCon.setRequestMethod("POST");
+                    urlCon.setRequestProperty("Accept", "application/json");
+                    urlCon.setRequestProperty("Content-Type", "application/json");
+                    urlCon.setRequestProperty("app-token", appToken);
                     urlCon.setDoOutput(true);
                     urlCon.setDoInput(true);
 
@@ -96,24 +101,27 @@ public class Login extends AppCompatActivity {
                             if (key.equals("jwt")) {
                                 String value = jsonReader.nextString();
                                 jwt = value;
+                                realmLogin();
                             } else {
                                 jsonReader.skipValue();
                             }
                         }
                         jsonReader.close();
-                        realmLogin();
 
                     } else {
-                        Log.e("COSYNC", urlCon.getResponseMessage());
                         Log.e("COSYNC", String.valueOf(urlCon.getResponseCode()));
+                        Log.e("COSYNC", urlCon.getResponseMessage());
                         if (urlCon != null) {
                             InputStream in = urlCon.getErrorStream();
                             InputStreamReader isw = new InputStreamReader(in);
                             JsonReader jsonReader = new JsonReader(isw);
                             jsonReader.beginObject();
                             while (jsonReader.hasNext()) {
-                                String value = jsonReader.nextString();
-                                Log.e("COSYNC", value);
+                                String key = jsonReader.nextName();
+                                if (key != null) {
+                                    String value = jsonReader.nextString();
+                                    Log.e("COSYNC", value);
+                                }
                             }
                             jsonReader.close();
                         }
@@ -134,17 +142,33 @@ public class Login extends AppCompatActivity {
             if (jwt != null) {
                 Credentials customJWTCredentials = Credentials.jwt(jwt);
                 AtomicReference<User> user = new AtomicReference<User>();
-                app.loginAsync(customJWTCredentials, it -> {
-                    if (it.isSuccess()) {
-                        Log.v("AUTH", "Login successfully with JWT");
-                        user.set(app.currentUser());
-                    } else {
-                        Log.e("AUTH", it.getError().toString());
-                    }
-                });
+                app.login(customJWTCredentials);
+                user.set(app.currentUser());
+                Intent intent = new Intent(this, MainMenu.class);
+                finish();
+                startActivity(intent);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public String md5(String s) {
+        try {
+            // Create MD5 Hash
+            MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
+            digest.update(s.getBytes());
+            byte messageDigest[] = digest.digest();
+
+            // Create Hex String
+            StringBuffer hexString = new StringBuffer();
+            for (int i=0; i<messageDigest.length; i++)
+                hexString.append(Integer.toHexString(0xFF & messageDigest[i]));
+
+            return hexString.toString();
+        }catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return "";
     }
 }
