@@ -31,6 +31,7 @@ import android.graphics.Color;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.hardware.camera2.CameraAccessException;
@@ -45,7 +46,9 @@ import android.util.Log;
 import android.util.Size;
 import android.util.SparseIntArray;
 import android.view.Surface;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -80,7 +83,12 @@ public class MainActivity extends AppCompatActivity {
     RepCounter repCounter;
     ImageView imgView;
     TextView repView;
+    Button startBtn;
+    Button backBtn;
+    Button resetBtn;
     boolean wasDown;
+    boolean isStart = false;
+    Float height;
 
     DrawView canvasView;
     private PoseDetector poseDetector;
@@ -133,6 +141,39 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }, getExecutor());
+
+
+       startBtn = findViewById(R.id.startBtn);
+       startBtn.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View view) {
+               if (isStart) {
+                   isStart = false;
+                   startBtn.setText("START");
+               } else {
+                   //isStart = true;
+                   startBtn.setText("STOP");
+                   isStart = true;
+               }
+           }
+       });
+
+       backBtn = findViewById(R.id.backBtn);
+       backBtn.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View view) {
+               finish();
+           }
+       });
+
+       resetBtn = findViewById(R.id.resetBtn);
+       resetBtn.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View view) {
+               repCounter.setReps(0);
+               repView.setText("Squats: " + String.valueOf(repCounter.getReps()));
+           }
+       });
     }
 
 
@@ -175,14 +216,19 @@ public class MainActivity extends AppCompatActivity {
                                 public void onSuccess(@NonNull Pose pose) {
                                     //get skeletal landmarks
                                     allPoseLandmarks = pose.getAllPoseLandmarks();
-                                    String pos = repCounter.checkPose(allPoseLandmarks);
                                     canvasView.DrawPose(allPoseLandmarks, imgView.getWidth(), imgView.getHeight(), imgView.getLeft(), imgView.getTop());
-                                    if (pos == "up" && wasDown == true) {
-                                        repCounter.setReps(repCounter.getReps() + 1);
-                                        repView.setText("Squats: " + String.valueOf(repCounter.getReps()));
-                                        wasDown = false;
-                                    } else if (pos == "down" && wasDown == false) {
-                                        wasDown = true;
+                                    if (isStart) {
+                                        if (height == null) {
+                                            height = allPoseLandmarks.get(PoseLandmark.LEFT_SHOULDER).getPosition().y - allPoseLandmarks.get(PoseLandmark.LEFT_ANKLE).getPosition().y;
+                                        }
+                                        String pos = repCounter.checkPose(allPoseLandmarks, height);
+                                        if (pos == "up" && wasDown == true) {
+                                            repCounter.setReps(repCounter.getReps() + 1);
+                                            repView.setText("Squats: " + String.valueOf(repCounter.getReps()));
+                                            wasDown = false;
+                                        } else if (pos == "down" && wasDown == false) {
+                                            wasDown = true;
+                                        }
                                     }
                                 }
                             }
@@ -203,8 +249,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-
+        //hello
         //preview.setSurfaceProvider(previewView.getSurfaceProvider());
 
 
