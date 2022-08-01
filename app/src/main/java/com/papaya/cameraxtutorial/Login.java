@@ -22,6 +22,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
@@ -122,15 +123,14 @@ public class Login extends AppCompatActivity {
                             jsonReader.beginObject();
                             while (jsonReader.hasNext()) {
                                 String key = jsonReader.nextName();
-                                if (key == "code") {
+                                if (key.equals("code")) {
                                     int code = jsonReader.nextInt();
                                     Log.e("COSYNC", String.valueOf(code));
-                                    if (code == 600) {
-                                        loginText.setText("Wrong email or password. Please try again.");
-                                    } else {
-                                        String value = jsonReader.nextString();
-                                        Log.e("COSYNC", value);
-                                    }
+                                } else if (key.equals("message")) {
+                                    String message = jsonReader.nextString();
+                                    Log.e("COSYNC", message);
+                                } else {
+                                    jsonReader.skipValue();
                                 }
                             }
                             jsonReader.close();
