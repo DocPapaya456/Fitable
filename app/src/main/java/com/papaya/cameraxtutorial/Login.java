@@ -1,5 +1,6 @@
 package com.papaya.cameraxtutorial;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Debug;
@@ -17,6 +18,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.papaya.cameraxtutorial.R;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -30,6 +35,15 @@ public class Login extends AppCompatActivity {
     String email, pwd;
     FirebaseUser currentUser;
     private FirebaseAuth mAuth;
+    ActivityResultLauncher<Intent> mStartRegisterForResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult()
+            , new ActivityResultCallback<ActivityResult>() {
+        @Override
+        public void onActivityResult(ActivityResult result) {
+            if (result.getResultCode() == Activity.RESULT_OK) {
+                finish();
+            }
+        }
+    });
     @Override
     protected void onCreate(Bundle savedBundleInstance) {
 
@@ -99,8 +113,7 @@ public class Login extends AppCompatActivity {
 
     void transitionToRegister() {
         Intent intent = new Intent(this, Register.class);
-        finish();
-        startActivity(intent);
+        mStartRegisterForResult.launch(intent);
     }
 
 

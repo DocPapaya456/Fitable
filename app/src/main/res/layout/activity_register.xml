@@ -35,13 +35,24 @@
         android:layout_below="@id/checkPassword"
         android:layout_marginTop="24dp"/>
     <TextView
+        android:id="@+id/welcomeText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Register to Fitable"
         android:textSize="24dp"
         android:layout_centerHorizontal="true"
         android:layout_above="@id/newEmail"
-        android:layout_marginBottom="24dp"/>
+        android:layout_marginBottom="48dp"/>
+    <TextView
+        android:id="@+id/errorText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Incorrect email or password"
+        android:textSize="16dp"
+        android:textColor="@color/red"
+        android:visibility="invisible"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@id/newEmail"/>
     <Button
         android:id="@+id/cancelBtn"
         android:layout_width="wrap_content"
