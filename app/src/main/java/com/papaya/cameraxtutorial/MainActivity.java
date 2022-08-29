@@ -95,6 +95,8 @@ public class MainActivity extends AppCompatActivity {
     int Scr_w;
     int Scr_h;
 
+
+    //creates initial app view
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
