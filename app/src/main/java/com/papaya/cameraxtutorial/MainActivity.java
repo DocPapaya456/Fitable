@@ -201,11 +201,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void analyze(@NonNull ImageProxy image) {
                 if (image != null) {
-                    /*Bitmap bitMapImg = previewView.getBitmap();
-                    Matrix matrix = new Matrix();
-                    matrix.postRotate(90f);
-                    Bitmap fbitMapImg = Bitmap.createBitmap(bitMapImg, 0, 0, bitMapImg.getWidth(), bitMapImg.getHeight(), matrix, true);
-                    InputImage inputImage = InputImage.fromBitmap(fbitMapImg, image.getImageInfo().getRotationDegrees());*/
                     Matrix matrix = new Matrix();
                     matrix.postRotate(0f);
                     matrix.preScale(1.0f, -1.0f);
@@ -224,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
                                             height = allPoseLandmarks.get(PoseLandmark.LEFT_SHOULDER).getPosition().y - allPoseLandmarks.get(PoseLandmark.LEFT_ANKLE).getPosition().y;
                                         }
                                         String pos = repCounter.checkPose(allPoseLandmarks, height);
-                                        if (pos == "up" && wasDown == true) {
+                                        if (pos == "up" && wasDown) {
                                             repCounter.setReps(repCounter.getReps() + 1);
                                             repView.setText("Squats: " + String.valueOf(repCounter.getReps()));
                                             wasDown = false;

@@ -90,6 +90,9 @@ public class RepCounter {
                         }
                     }
                     break;
+                case "push ups":
+
+                    break;
                 default:
                     return "error";
 
