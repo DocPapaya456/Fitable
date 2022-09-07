@@ -9,6 +9,14 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:text="squats" />
+    <Button
+        android:id="@+id/lungesBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/squatBtn"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="12dp"
+        android:text="Lunges"/>
 
 
 </RelativeLayout>

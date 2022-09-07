@@ -9,16 +9,27 @@ import android.widget.Button;
 
 public class MainMenu extends AppCompatActivity {
     Button squatBtn;
+    Button lungesBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_menu);
         squatBtn = findViewById(R.id.squatBtn);
+        lungesBtn = findViewById(R.id.lungesBtn);
+        Intent intent = new Intent(MainMenu.this, MainActivity.class);
         squatBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(MainMenu.this, MainActivity.class));
+                intent.putExtra("exercise", "squats");
+                startActivity(intent);
+            }
+        });
+        lungesBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                intent.putExtra("exercise", "lunges");
+                startActivity(intent);
             }
         });
     }

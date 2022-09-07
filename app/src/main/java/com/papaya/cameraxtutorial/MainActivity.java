@@ -21,6 +21,7 @@ import androidx.lifecycle.LifecycleOwner;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -89,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
     boolean wasDown;
     boolean isStart = false;
     Float height;
+    String exerciseCountHead;
 
     DrawView canvasView;
     private PoseDetector poseDetector;
@@ -117,7 +119,19 @@ public class MainActivity extends AppCompatActivity {
 
         repView = findViewById(R.id.repCounter);
 
-        repCounter = new RepCounter("squats");
+        Intent intent = getIntent();
+        String exercise = intent.getStringExtra("exercise");
+        repCounter = new RepCounter(exercise);
+        if (exercise.equals("squats")) {
+            exerciseCountHead = "Squats: ";
+        } else if (exercise.equals("lunges")) {
+            exerciseCountHead = "Lunges: ";
+        }
+        repView.setText(exerciseCountHead + "0");
+
+
+
+
 
         Scr_w = (int) Resources.getSystem().getDisplayMetrics().widthPixels;
         Scr_h = (int) Resources.getSystem().getDisplayMetrics().heightPixels;
@@ -173,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
            @Override
            public void onClick(View view) {
                repCounter.setReps(0);
-               repView.setText("Squats: " + String.valueOf(repCounter.getReps()));
+               repView.setText(exerciseCountHead + String.valueOf(repCounter.getReps()));
            }
        });
     }
@@ -221,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
                                         String pos = repCounter.checkPose(allPoseLandmarks, height);
                                         if (pos == "up" && wasDown) {
                                             repCounter.setReps(repCounter.getReps() + 1);
-                                            repView.setText("Squats: " + String.valueOf(repCounter.getReps()));
+                                            repView.setText(exerciseCountHead + String.valueOf(repCounter.getReps()));
                                             wasDown = false;
                                         } else if (pos == "down" && wasDown == false) {
                                             wasDown = true;

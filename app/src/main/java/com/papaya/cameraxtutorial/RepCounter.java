@@ -79,8 +79,8 @@ public class RepCounter {
             switch (type) {
                 case "squats":
                     if (lh != null && rh != null && lk != null && rk != null) {
-                        if (lh.getPosition().y <= (lk.getPosition().y + 10)) {
-                            if (lh.getPosition().y >= lk.getPosition().y - 10) {
+                        if (lh.getPosition().y <= (lk.getPosition().y + 50)) {
+                            if (lh.getPosition().y >= lk.getPosition().y - 50) {
                                 return "down";
                             } else {
                                 return "hips too low";
@@ -90,8 +90,18 @@ public class RepCounter {
                         }
                     }
                     break;
-                case "push ups":
-
+                case "lunges":
+                    if (lh != null && rh != null && lk != null && rk != null && la != null && ra != null) {
+                        double leftLegAngle = getAngle(lh, lk, la);
+                        double rightLegAngle = getAngle(rh, rk, ra);
+                        if (leftLegAngle >= 80 && leftLegAngle <= 110) {
+                            if (rightLegAngle >= 80 && rightLegAngle <= 110) {
+                                return "down";
+                            }
+                        } else if (leftLegAngle > 110 && rightLegAngle > 110) {
+                            return "up";
+                        }
+                    }
                     break;
                 default:
                     return "error";
@@ -101,6 +111,20 @@ public class RepCounter {
         }
         return "error";
 
+    }
+
+    static double getAngle(PoseLandmark firstPoint, PoseLandmark midPoint, PoseLandmark lastPoint) {
+        double result =
+                Math.toDegrees(
+                        atan2(lastPoint.getPosition().y - midPoint.getPosition().y,
+                                lastPoint.getPosition().x - midPoint.getPosition().x)
+                                - atan2(firstPoint.getPosition().y - midPoint.getPosition().y,
+                                firstPoint.getPosition().x - midPoint.getPosition().x));
+        result = Math.abs(result); // Angle should never be negative
+        if (result > 180) {
+            result = (360.0 - result); // Always get the acute representation of the angle
+        }
+        return result;
     }
 
 }
