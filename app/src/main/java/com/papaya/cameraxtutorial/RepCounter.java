@@ -103,6 +103,18 @@ public class RepCounter {
                         }
                     }
                     break;
+                case "push-ups":
+                    if (ls != null && rs != null && le != null && re != null && lw != null && rw != null) {
+                        double leftArmAngle = getAngle(ls, le, lw);
+                        double rightArmAngle = getAngle(rs, re, rw);
+                        if (leftArmAngle >= 80 && leftArmAngle <= 110) {
+                            if (rightArmAngle >= 80 && rightArmAngle <= 110) {
+                                return "down";
+                            }
+                        } else if (leftArmAngle > 110 && rightArmAngle > 110) {
+                            return "up";
+                        }
+                    }
                 default:
                     return "error";
 
