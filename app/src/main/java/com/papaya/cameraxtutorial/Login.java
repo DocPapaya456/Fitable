@@ -2,6 +2,7 @@ package com.papaya.cameraxtutorial;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.os.Bundle;
 import android.os.Debug;
 import android.util.JsonReader;
@@ -11,11 +12,21 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.android.gms.auth.api.identity.BeginSignInRequest;
+import com.google.android.gms.auth.api.identity.BeginSignInResult;
+import com.google.android.gms.auth.api.identity.Identity;
+import com.google.android.gms.auth.api.identity.SignInClient;
+import com.google.android.gms.auth.api.identity.SignInCredential;
+import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 import com.papaya.cameraxtutorial.R;
 
 import androidx.activity.result.ActivityResult;
@@ -23,8 +34,10 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import io.realm.mongodb.User;
 
 
 public class Login extends AppCompatActivity {
@@ -34,7 +47,10 @@ public class Login extends AppCompatActivity {
     TextView registerBtn;
     String email, pwd;
     FirebaseUser currentUser;
+    private static final int REQ_ONE_TAP = 2;
     private FirebaseAuth mAuth;
+    private SignInClient oneTapClient;
+    private BeginSignInRequest signInRequest;
     ActivityResultLauncher<Intent> mStartRegisterForResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult()
             , new ActivityResultCallback<ActivityResult>() {
         @Override
@@ -51,7 +67,7 @@ public class Login extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         mAuth = FirebaseAuth.getInstance();
         Button loginBtn = findViewById(R.id.loginBtn);
-        Button skipBtn = findViewById(R.id.skipBtn);
+        Button googleLoginBtn = findViewById(R.id.googleSignIn);
         registerBtn = findViewById(R.id.registerBtn);
         emailTxtField = findViewById(R.id.emailTxtField);
         pwdTxtField = findViewById(R.id.passTxtField);
@@ -60,13 +76,19 @@ public class Login extends AppCompatActivity {
         if (currentUser != null) {
             transitionToMain();
         }
+        getSupportActionBar().hide();
 
-        skipBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                transitionToMain();
-            }
-        });
+        oneTapClient = Identity.getSignInClient(Login.this);
+        signInRequest = BeginSignInRequest.builder()
+                .setGoogleIdTokenRequestOptions(
+                        BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                                .setSupported(true)
+                                .setServerClientId(getString(R.string.default_web_client_id))
+                                .setFilterByAuthorizedAccounts(true)
+                                .setFilterByAuthorizedAccounts(false)
+                                .build())
+                .build();
+
 
         registerBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -102,9 +124,76 @@ public class Login extends AppCompatActivity {
             }
         });
 
+        googleLoginBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                oneTapClient.beginSignIn(signInRequest).addOnSuccessListener(new OnSuccessListener<BeginSignInResult>() {
+                    @Override
+                    public void onSuccess(BeginSignInResult beginSignInResult) {
+                        try {
+                            startIntentSenderForResult(
+                                    beginSignInResult.getPendingIntent().getIntentSender(),
+                                    REQ_ONE_TAP, null, 0, 0, 0);
+                        } catch (IntentSender.SendIntentException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
+        });
+
 
 
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case REQ_ONE_TAP:
+                try {
+                    SignInCredential credential = oneTapClient.getSignInCredentialFromIntent(data);
+                    String idToken = credential.getGoogleIdToken();
+                    if (idToken !=  null) {
+                        AuthCredential firebaseCredential = GoogleAuthProvider.getCredential(idToken, null);
+                        mAuth.signInWithCredential(firebaseCredential)
+                                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<AuthResult> task) {
+                                        if (task.isSuccessful()) {
+                                            // Sign in success, update UI with the signed-in user's information
+                                            Log.d("SIGN IN", "signInWithCredential:success");
+                                            boolean isNew = task.getResult().getAdditionalUserInfo().isNewUser();
+                                            if (isNew) {
+                                                Intent intent = new Intent(Login.this, UsernameActivity.class);
+                                                finish();
+                                                startActivity(intent);
+                                            } else {
+                                                transitionToMain();
+                                            }
+
+                                        } else {
+                                            // If sign in fails, display a message to the user.
+                                            Log.w("SIGN IN", "signInWithCredential:failure", task.getException());
+
+                                        }
+                                    }
+                                });
+                        Log.d("SIGN IN", "Got ID token.");
+                    }
+                } catch (ApiException e) {
+                    e.printStackTrace();
+                }
+                break;
+        }
+    }
+
     void transitionToMain() {
         Intent intent = new Intent(this, MainMenu.class);
         finish();
