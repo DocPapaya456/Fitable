@@ -17,7 +17,7 @@ import java.util.List;
 
 public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ViewHolder> {
 
-    ArrayList<Course> courses;
+    ArrayList<Course> courses = new ArrayList<>();
     Context context;
 
     public ClassAdapter(Context context, ArrayList<Course> courses) {
@@ -34,14 +34,20 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ViewHolder> 
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Course currentCourse = courses.get(position);
-        holder.className.setText(currentCourse.getName());
-        holder.assignExercise(currentCourse);
+        if (courses != null && !courses.isEmpty()) {
+            Course currentCourse = courses.get(position);
+            holder.className.setText(currentCourse.getName());
+            holder.assignExercise(currentCourse);
+        }
     }
 
     @Override
     public int getItemCount() {
-        return courses.size();
+        if (courses != null) {
+            return courses.size();
+        } else {
+            return 0;
+        }
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

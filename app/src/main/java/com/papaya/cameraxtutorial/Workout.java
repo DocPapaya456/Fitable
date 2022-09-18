@@ -2,8 +2,9 @@ package com.papaya.cameraxtutorial;
 
 import java.util.ArrayList;
 import java.util.Objects;
+import java.io.Serializable;
 
-public class Workout {
+public class Workout implements Serializable{
     String creator;
     String name;
     String description;

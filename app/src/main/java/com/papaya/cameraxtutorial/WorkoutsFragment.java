@@ -83,13 +83,13 @@ public class WorkoutsFragment extends Fragment {
         ArrayList<Workout> workoutList = new ArrayList<>();
         RecyclerView mRecyclerView = rootView.findViewById(R.id.workoutsRecyclerView);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
-        WorkoutsAdapter mAdapter = new WorkoutsAdapter(getActivity(), workoutList);
-        mAdapter.setOnItemClickListener(new WorkoutsAdapter.ItemClickListener() {
+        WorkoutsAdapter mAdapter = new WorkoutsAdapter(getActivity(), workoutList, new View.OnClickListener() {
             @Override
-            public void onItemClick(View v, int position) {
-                Workout currentWorkout = workoutList.get(position);
+            public void onClick(View view) {
                 Intent intent = new Intent(getActivity(), StartExerciseActivity.class);
-                intent.putExtra("workout", (Parcelable) currentWorkout);
+                Workout currentWorkout = workoutList.get(mRecyclerView.getChildLayoutPosition(view));
+                intent.putExtra("workout", currentWorkout);
+                startActivity(intent);
             }
         });
         mRecyclerView.setAdapter(mAdapter);

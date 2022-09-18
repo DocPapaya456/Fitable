@@ -17,11 +17,16 @@ import com.google.android.gms.auth.api.identity.BeginSignInResult;
 import com.google.android.gms.auth.api.identity.Identity;
 import com.google.android.gms.auth.api.identity.SignInClient;
 import com.google.android.gms.auth.api.identity.SignInCredential;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -47,10 +52,10 @@ public class Login extends AppCompatActivity {
     TextView registerBtn;
     String email, pwd;
     FirebaseUser currentUser;
-    private static final int REQ_ONE_TAP = 2;
+    private static final int SIGN_IN = 2;
     private FirebaseAuth mAuth;
-    private SignInClient oneTapClient;
-    private BeginSignInRequest signInRequest;
+    private GoogleSignInClient signInClient;
+    private GoogleSignInOptions gso;
     ActivityResultLauncher<Intent> mStartRegisterForResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult()
             , new ActivityResultCallback<ActivityResult>() {
         @Override
@@ -78,16 +83,8 @@ public class Login extends AppCompatActivity {
         }
         getSupportActionBar().hide();
 
-        oneTapClient = Identity.getSignInClient(Login.this);
-        signInRequest = BeginSignInRequest.builder()
-                .setGoogleIdTokenRequestOptions(
-                        BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
-                                .setSupported(true)
-                                .setServerClientId(getString(R.string.default_web_client_id))
-                                .setFilterByAuthorizedAccounts(true)
-                                .setFilterByAuthorizedAccounts(false)
-                                .build())
-                .build();
+        gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().requestId().requestIdToken(getString(R.string.default_web_client_id)).build();
+        signInClient = GoogleSignIn.getClient(this, gso);
 
 
         registerBtn.setOnClickListener(new View.OnClickListener() {
@@ -127,23 +124,8 @@ public class Login extends AppCompatActivity {
         googleLoginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                oneTapClient.beginSignIn(signInRequest).addOnSuccessListener(new OnSuccessListener<BeginSignInResult>() {
-                    @Override
-                    public void onSuccess(BeginSignInResult beginSignInResult) {
-                        try {
-                            startIntentSenderForResult(
-                                    beginSignInResult.getPendingIntent().getIntentSender(),
-                                    REQ_ONE_TAP, null, 0, 0, 0);
-                        } catch (IntentSender.SendIntentException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        e.printStackTrace();
-                    }
-                });
+                Intent intent = signInClient.getSignInIntent();
+                startActivityForResult(intent, SIGN_IN);
             }
         });
 
@@ -156,10 +138,10 @@ public class Login extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         switch (requestCode) {
-            case REQ_ONE_TAP:
+            case SIGN_IN:
                 try {
-                    SignInCredential credential = oneTapClient.getSignInCredentialFromIntent(data);
-                    String idToken = credential.getGoogleIdToken();
+                    Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+                    String idToken = task.getResult(ApiException.class).getIdToken();
                     if (idToken !=  null) {
                         AuthCredential firebaseCredential = GoogleAuthProvider.getCredential(idToken, null);
                         mAuth.signInWithCredential(firebaseCredential)
@@ -171,6 +153,7 @@ public class Login extends AppCompatActivity {
                                             Log.d("SIGN IN", "signInWithCredential:success");
                                             boolean isNew = task.getResult().getAdditionalUserInfo().isNewUser();
                                             if (isNew) {
+
                                                 Intent intent = new Intent(Login.this, UsernameActivity.class);
                                                 finish();
                                                 startActivity(intent);

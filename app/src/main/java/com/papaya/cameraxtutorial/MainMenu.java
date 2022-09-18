@@ -15,11 +15,16 @@ import android.widget.Button;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import org.checkerframework.checker.units.qual.A;
+
+import java.util.ArrayList;
+
 public class MainMenu extends AppCompatActivity {
     NavHostFragment navHostFragment;
     NavController navController;
     BottomNavigationView bottomNav;
     FragmentManager supportFragmentManager;
+    ArrayList<Thread> threads = new ArrayList<>();
 
 
     @Override
@@ -48,5 +53,15 @@ public class MainMenu extends AppCompatActivity {
         navigationFragmentManager.beginTransaction().detach(currentFragment).commit();
         navigationFragmentManager.beginTransaction().attach(currentFragment).commit();
 
+    }
+
+    public void stopAllThreads() {
+        for (Thread thread : threads) {
+            thread.interrupt();
+        }
+    }
+
+    public void addThread(Thread thread) {
+        threads.add(thread);
     }
 }
